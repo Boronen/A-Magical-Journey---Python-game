@@ -1,0 +1,92 @@
+# CHAPTER_01
+# SCENE_01 – Ébredés
+
+[NARRATOR]
+Sötétség. Csend. A hideg kőpadló a hátad alatt lassan ébreszt. A levegő állott, a falak nedvesek. Egy cellában vagy.
+
+[PLAYER_THOUGHT]
+Hol vagyok? Mi történt? Nem emlékszem... még a nevemre sem.
+
+[NARRATOR]
+A tested fáj, de mozdulni tudsz. A csuklódon egy régi, kopott bilincs. A zár nyitva van.
+
+[ACTION]
+1. Felállsz, és körülnézel a cellában.
+2. Megvizsgálod a bilincset.
+3. Kiáltasz segítségért.
+
+[RESPONSE_1]
+[NARRATOR]
+A cella kicsi, de van egy rozsdás ajtó, és egy repedés a falon, amin keresztül halvány fény szűrődik be.
+
+[RESPONSE_2]
+[NARRATOR]
+A bilincs hideg és nehéz, de már nem tart fogva. Valaki kinyithatta... vagy valami.
+
+[RESPONSE_3]
+[NARRATOR]
+A hangod visszhangzik a kőfalakról. Senki nem válaszol. Csak a saját lélegzeted hallod.
+
+# SCENE_02 – A folyosó
+
+[NARRATOR]
+Kilépsz a cellából. Egy hosszú, sötét folyosó tárul eléd. A falakon fáklyák pislákolnak. Valami mozog az árnyékban.
+
+[PLAYER_THOUGHT]
+Ez nem lehet valóság... vagy mégis?
+
+[NARRATOR]
+Egy árnyalak közeledik. Nem ember. Nem állat. Valami más. A szemei vörösen izzanak.
+
+[BATTLE_TRIGGER]
+enemy_type: shadow_beast
+enemy_level: 1
+enemy_count: 1
+
+[NARRATOR]
+A lény teste szertefoszlik, mintha sosem létezett volna. A padló megremeg. A csend visszatér.
+
+# SCENE_03 – Találkozás Lua-val
+
+[NARRATOR]
+A folyosó végén egy ajtó. Kinyitod. Egy tágas, könyvekkel teli terembe lépsz. A levegőben pergamen és füst illata keveredik.
+
+[LUA]
+Te... te is itt ébredtél?
+
+[PLAYER]
+Igen. Nem tudom, mi ez a hely. Ki vagy te?
+
+[LUA]
+A nevem Lua. Régóta itt vagyok... vagy csak úgy érzem. Ez a hely... eltorzítja az időt.
+
+[ACTION]
+1. „Emlékszel valamire?”
+2. „Tudod, hogyan juthatunk ki innen?”
+3. „Mi ez az egész hely?”
+
+[RESPONSE_1]
+[LUA]
+Csak foszlányokat. Egy név... Valerion. És egy ígéret, amit nem tudok felidézni.
+
+[RESPONSE_2]
+[LUA]
+Talán. De nem egyedül. Együtt több esélyünk van.
+
+[RESPONSE_3]
+[LUA]
+Egy torz világ. Egy börtön. Egy próba. De hogy ki áll mögötte... azt még nem tudom.
+
+[NARRATOR]
+Lua rád néz. A tekintete komoly, de nem ellenséges.
+
+[LUA]
+Ha együtt indulunk, talán rájövünk az igazságra.
+
+# SCENE_04 – Társulás
+
+[NARRATOR]
+Lua csatlakozik hozzád. Együtt indultok tovább a sötét folyosón, ahol minden lépés újabb kérdést vet fel.
+
+[CHAPTER_END]
+A történet elkezdődött. {player_name} és Lua sorsa összefonódik. A mélység figyel.

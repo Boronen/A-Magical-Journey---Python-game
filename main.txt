@@ -1,0 +1,90 @@
+from gameCore import Player, Enemy, battle, enemy_templates, SaveManager, safe_input_int
+import random
+
+# ================== Party létrehozása ==================
+def create_party():
+    party = []
+    for i in range(3):
+        print(f"\n🎮 {i+1}. karakter létrehozása")
+        name = input("Név: ").strip()
+        race = input("Faj (orc/elf/human): ").strip().lower()
+        pclass = input("Osztály (warrior/thief/mage): ").strip().lower()
+        party.append(Player(name, race, pclass))
+    return party
+
+# ================== Enemy spawn ==================
+def spawn_enemies():
+    """Egyszerű példa: random számú ellenfél véletlenszerűen kiválasztva"""
+    enemy_count = random.randint(1, 3)
+    enemies = []
+    for _ in range(enemy_count):
+        base = random.choice(enemy_templates)
+        enemies.append(Enemy(base.name, base.max_hp, base.dmg, base.defense, base.gold, base.exp))
+    return enemies
+
+# ================== Falu menü ==================
+def village_menu(party):
+    while True:
+        print("\n🏘️ Falu")
+        print("1. Kalandra fel (Harc)")
+        print("2. Party statok")
+        print("3. Mentés")
+        print("4. Kilépés a játékból")
+        c = input("> ").strip()
+
+        if c == "1":
+            enemies = spawn_enemies()
+            print(f"\n👹 {len(enemies)} ellenség közeledik!")
+            battle(party, enemies)
+
+        elif c == "2":
+            for p in party:
+                p.show_stats()
+
+        elif c == "3":
+            # egyszerű mentés csak az első karakterre demonstrációhoz
+            slot = safe_input_int("Mentés slot (1-3): ", 1, 3)
+            SaveManager.save(party[0], slot)
+            print("💾 Mentve (jelenleg csak az első karakter mentése van megoldva)")
+
+        elif c == "4":
+            print("👋 Kilépés a játékból...")
+            break
+
+# ================== Betöltés ==================
+def load_party():
+    slot = safe_input_int("Betöltés slot (1-3): ", 1, 3)
+    first_player = SaveManager.load(slot)
+    if first_player:
+        print("✅ Mentés betöltve.")
+        # a példában 1 karaktert töltünk vissza, de bővíthető 3 karakteres mentésre is
+        party = [first_player]
+        # üres placeholder karakterek, ha nem volt több mentve
+        while len(party) < 3:
+            party.append(Player(f"NPC_{len(party)+1}", "human", "warrior"))
+        return party
+    return None
+
+# ================== Főmenü ==================
+def main_menu():
+    while True:
+        print("\n=== 📜 Főmenü ===")
+        print("1. Új játék")
+        print("2. Betöltés")
+        print("3. Kilépés")
+        choice = input("> ").strip()
+
+        if choice == "1":
+            party = create_party()
+            village_menu(party)
+        elif choice == "2":
+            party = load_party()
+            if party:
+                village_menu(party)
+        elif choice == "3":
+            print("👋 Viszlát!")
+            break
+
+# ================== Program indítás ==================
+if __name__ == "__main__":
+    main_menu()

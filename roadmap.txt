@@ -1,0 +1,68 @@
+Magical Journey – Development Roadmap
+1. Core Narrative & Structure
+[ ] Translate all existing Hungarian content to English (dialogues, UI, spell texts)
+
+[ ] Write and structure Chapter 2–13 (target: 2–3 hours per chapter)
+
+[ ] Define chapter themes, emotional arcs, and bonding triggers
+
+[ ] Implement chapter flags and progression logic
+
+2. Combat & Spell System
+[ ] Implement rage/ultimate bar system with activation logic
+
+[ ] Finalize and program main character spell set (15 actives, 5 passives, 3 ultimates)
+
+[ ] Design and implement class-specific spells (warrior, mage, rogue, etc.)
+
+[ ] Create spell engine: damage, status effects, conditions, scaling
+
+[ ] Add spell evolution and synergy mechanics (e.g. echo field, bonding-based boosts)
+
+3. Character Development
+[ ] Flesh out secondary characters (Ficher, Morionn, Lua, Lance, etc.)
+
+[ ] Define backstories, motivations, and bonding paths
+
+[ ] Implement bonding system: bonding.txt, camp dialogues, combat reactions
+
+[ ] Add dynamic relationship flags and branching consequences
+
+4. World Building
+[ ] Build Village Hub: inn, quest board, NPCs, side quests
+
+[ ] Design Forest Zone: grindable area with scaling enemies and loot
+
+[ ] Add exploration mechanics: movement, encounter triggers, loot tables
+
+[ ] Implement fast travel and zone transitions
+
+5. Systems & UI
+[ ] Create Cheat Menu for testing/debugging (toggle stats, skip chapters, unlock spells)
+
+[ ] Build Save/Load system with persistent flags and bonding states
+
+[ ] Implement Settings menu: language toggle, difficulty, audio/text speed
+
+[ ] Design combat UI: spell selection, rage bar, status indicators
+
+6. Data & Localization
+[ ] Externalize all game text to .txt files for easy translation
+
+[ ] Structure spell_texts.txt, fight_text.txt, bonding.txt, chapter_flags.txt
+
+[ ] Add support for multi-language switching (EN/HU)
+
+7. Audio & Atmosphere
+[ ] Add ambient sound layers per zone (village, forest, camp)
+
+[ ] Implement dynamic music transitions (combat, bonding, story beats)
+
+[ ] Add voice stingers for ultimate spells and key story moments (optional)
+
+8. Testing & Polish
+[ ] Write unit tests for combat logic, spell triggers, rage bar
+
+[ ] Create debug logging for bonding and story flags
+
+[ ] Playtest each chapter for pacing, emotional impact, and mechanical balance

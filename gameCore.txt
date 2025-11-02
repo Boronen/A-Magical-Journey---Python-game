@@ -1,0 +1,344 @@
+import json
+import random
+import os
+from pathlib import Path
+
+# ================== Hasznos függvények ==================
+def safe_input_int(prompt, min_val=None, max_val=None):
+    """Biztonságos egész szám beolvasás hibakezeléssel."""
+    while True:
+        try:
+            val = int(input(prompt).strip())
+            if (min_val is not None and val < min_val) or (max_val is not None and val > max_val):
+                print(f"❌ Érvénytelen érték ({min_val}-{max_val})")
+                continue
+            return val
+        except ValueError:
+            print("❌ Kérlek számot adj meg!")
+
+# ================== Spell Rendszer ==================
+class Spell:
+    def __init__(self, name, mana_cost, base_damage, level=1):
+        self.name = name
+        self.mana_cost = mana_cost
+        self.base_damage = base_damage
+        self.level = level
+
+    def damage(self, magic_stat):
+        """Sebzés számítása a magic stat + spell szint alapján."""
+        return int(self.base_damage + magic_stat * (0.8 + 0.2 * self.level))
+
+    def upgrade(self):
+        if self.level < 3:
+            self.level += 1
+            print(f"⬆️ {self.name} fejlesztve Lv{self.level}")
+        else:
+            print(f"⚠️ {self.name} már max szintű.")
+
+    def to_dict(self):
+        return {
+            "name": self.name,
+            "mana_cost": self.mana_cost,
+            "base_damage": self.base_damage,
+            "level": self.level
+        }
+
+    @staticmethod
+    def from_dict(d):
+        return Spell(d["name"], d["mana_cost"], d["base_damage"], d["level"])
+
+# ================== Osztályonkénti Spellek ==================
+def get_class_spells(pclass):
+    if pclass == "warrior":
+        return {
+            "Power Slash": Spell("Power Slash", 3, 5),
+            "Whirlwind": Spell("Whirlwind", 5, 8),
+            "Earth Shatter": Spell("Earth Shatter", 8, 12)
+        }
+    elif pclass == "thief":
+        return {
+            "Poison Dagger": Spell("Poison Dagger", 3, 4),
+            "Shadow Strike": Spell("Shadow Strike", 5, 7),
+            "Vanish Blade": Spell("Vanish Blade", 8, 11)
+        }
+    elif pclass == "mage":
+        return {
+            "Ice Shard": Spell("Ice Shard", 3, 6),
+            "Ice Pillar": Spell("Ice Pillar", 5, 9),
+            "Ice Storm": Spell("Ice Storm", 8, 13)
+        }
+    else:
+        return {}
+
+# ================== Item ==================
+class Item:
+    def __init__(self, name, description="", heal_amount=0):
+        self.name = name
+        self.description = description
+        self.heal_amount = heal_amount
+
+    def use(self, player):
+        player.hp = min(player.max_hp, player.hp + self.heal_amount)
+        print(f"💊 {self.name} +{self.heal_amount} HP (új HP: {player.hp}/{player.max_hp})")
+
+    def to_dict(self):
+        return {"name": self.name, "description": self.description, "heal_amount": self.heal_amount}
+
+    @staticmethod
+    def from_dict(d):
+        return Item(d["name"], d.get("description", ""), d.get("heal_amount", 0))
+
+# ================== Enemy ==================
+class Enemy:
+    def __init__(self, name, hp, dmg, defense, gold, exp):
+        self.name = name
+        self.hp = self.max_hp = hp
+        self.dmg = dmg
+        self.defense = defense
+        self.gold = gold
+        self.exp = exp
+
+enemy_templates = [
+    Enemy("Farkas", 30, 6, 2, 10, 15),
+    Enemy("Goblin", 40, 8, 4, 12, 20),
+    Enemy("Óriás Patkány", 25, 5, 1, 6, 10),
+]
+
+# ================== Player ==================
+class Player:
+    def __init__(self, name, race, pclass):
+        self.name = name
+        self.race = race
+        self.pclass = pclass
+        self.level = 1
+
+        # alap statok
+        self.hp = self.max_hp = 30
+        self.mana = self.max_mana = 10
+        self.attack = 3
+        self.defense = 2
+        self.magic = 2
+        self.gold = 0
+        self.exp = 0
+        self.energy = self.max_energy = 10
+
+        # inventory + spellek
+        self.inventory = []
+        self.spells = get_class_spells(pclass)
+
+        # bónuszok alkalmazása
+        self.apply_race_bonus()
+        self.apply_class_bonus()
+
+    def apply_race_bonus(self):
+        races = {
+            "orc": {"hp": 10, "attack": 2, "magic": 0},
+            "elf": {"hp": 5, "attack": 1, "magic": 2},
+            "human": {"hp": 5, "attack": 1, "magic": 1}
+        }
+        bonus = races.get(self.race, {})
+        self.max_hp += bonus.get("hp", 0)
+        self.hp = self.max_hp
+        self.attack += bonus.get("attack", 0)
+        self.magic += bonus.get("magic", 0)
+
+    def apply_class_bonus(self):
+        classes = {
+            "warrior": {"attack": 3, "magic": 0},
+            "thief": {"attack": 2, "magic": 1},
+            "mage": {"attack": 0, "magic": 3}
+        }
+        bonus = classes.get(self.pclass, {})
+        self.attack += bonus.get("attack", 0)
+        self.magic += bonus.get("magic", 0)
+
+    # === Inventory ===
+    def add_item(self, item):
+        self.inventory.append(item)
+        print(f"✅ {item.name} hozzáadva az inventoryhoz.")
+
+    def show_inventory(self):
+        if not self.inventory:
+            print("📦 Inventory üres")
+            return
+        for i, it in enumerate(self.inventory, 1):
+            print(f"{i}. {it.name} - {it.description}")
+        idx = safe_input_int("Használsz valamit? (0 = nem): ", 0, len(self.inventory))
+        if idx != 0:
+            self.inventory[idx-1].use(self)
+            self.inventory.pop(idx-1)
+
+    # === Spell használat ===
+    def cast_spell(self):
+        spell_list = list(self.spells.values())
+        print("\n--- Spellek ---")
+        for i, s in enumerate(spell_list, 1):
+            print(f"{i}. {s.name} (Mana: {s.mana_cost}, DMG: {s.damage(self.magic)}) Lv{s.level}")
+        idx = safe_input_int("> Spell választás: ", 1, len(spell_list))
+        spell = spell_list[idx-1]
+        if self.mana >= spell.mana_cost:
+            self.mana -= spell.mana_cost
+            return spell.damage(self.magic)
+        else:
+            print("❌ Nincs elég mana!")
+            return 0
+
+    # === EXP / Level ===
+    def gain_exp(self, amount):
+        self.exp += amount
+        needed = self.level * 20
+        if self.exp >= needed:
+            self.exp -= needed
+            self.level += 1
+            self.max_hp += 5
+            self.max_mana += 3
+            self.attack += 1
+            self.magic += 1
+            print(f"🎉 {self.name} szintet lépett ({self.level})!")
+
+    def show_stats(self):
+        print(f"\n--- {self.name} ---")
+        print(f"Race: {self.race}, Class: {self.pclass}, Level: {self.level}")
+        print(f"HP: {self.hp}/{self.max_hp} | Mana: {self.mana}/{self.max_mana}")
+        print(f"Attack: {self.attack}, Magic: {self.magic}, Defense: {self.defense}")
+        print(f"Gold: {self.gold}, EXP: {self.exp}")
+
+    # === Save / Load ===
+    def to_dict(self):
+        return {
+            "name": self.name, "race": self.race, "pclass": self.pclass,
+            "level": self.level,
+            "hp": self.hp, "max_hp": self.max_hp,
+            "mana": self.mana, "max_mana": self.max_mana,
+            "attack": self.attack, "defense": self.defense, "magic": self.magic,
+            "gold": self.gold, "exp": self.exp,
+            "inventory": [i.to_dict() for i in self.inventory],
+            "spells": {n: s.to_dict() for n, s in self.spells.items()}
+        }
+
+    @staticmethod
+    def from_dict(d):
+        p = Player(d["name"], d["race"], d["pclass"])
+        p.level = d["level"]
+        p.hp = d["hp"]; p.max_hp = d["max_hp"]
+        p.mana = d["mana"]; p.max_mana = d["max_mana"]
+        p.attack = d["attack"]; p.defense = d["defense"]; p.magic = d["magic"]
+        p.gold = d["gold"]; p.exp = d["exp"]
+        p.inventory = [Item.from_dict(i) for i in d["inventory"]]
+        p.spells = {n: Spell.from_dict(s) for n, s in d["spells"].items()}
+        return p
+
+# ================== Mentéskezelő ==================
+SAVE_DIR = Path.home() / "Documents" / "MagicalJourney" / "Saves"
+os.makedirs(SAVE_DIR, exist_ok=True)
+
+class SaveManager:
+    @staticmethod
+    def path(slot):
+        return SAVE_DIR / f"save{slot}.json"
+
+    @staticmethod
+    def save(player, slot):
+        with open(SaveManager.path(slot), "w", encoding="utf-8") as f:
+            json.dump(player.to_dict(), f, ensure_ascii=False, indent=2)
+        print(f"✅ Mentés kész Slot {slot}-ba.")
+
+    @staticmethod
+    def load(slot):
+        path = SaveManager.path(slot)
+        if not path.exists():
+            print("❌ Nincs mentés ebben a slotban.")
+            return None
+        with open(path, "r", encoding="utf-8") as f:
+            return Player.from_dict(json.load(f))
+
+# ================== Party Combat Rendszer ==================
+def choose_target(target_list, prompt="Válassz célpontot"):
+    living_targets = [t for t in target_list if t.hp > 0]
+    if not living_targets:
+        return None
+    print(f"\n{prompt}:")
+    for i, t in enumerate(living_targets, 1):
+        print(f"{i}. {t.name} (HP: {t.hp}/{t.max_hp})")
+    idx = 0
+    while idx < 1 or idx > len(living_targets):
+        try:
+            idx = int(input("> "))
+        except ValueError:
+            pass
+    return living_targets[idx - 1]
+
+def is_party_dead(party):
+    return all(member.hp <= 0 for member in party)
+
+def is_enemy_dead(enemies):
+    return all(enemy.hp <= 0 for enemy in enemies)
+
+def battle(players, enemies):
+    print(f"\n⚔️ Harc elkezdődött!")
+    round_num = 1
+
+    while not is_party_dead(players) and not is_enemy_dead(enemies):
+        print(f"\n=== 🌀 KÖR {round_num} ===")
+        # --- Player kör ---
+        for player in players:
+            if player.hp <= 0:
+                continue  # halott karakter nem lép
+
+            print(f"\n👉 {player.name} lép ({player.hp}/{player.max_hp} HP)")
+            print("1. Támadás  2. Spell  3. Item")
+            choice = input("> ").strip()
+
+            if choice == "1":
+                target = choose_target(enemies, "Célpont kiválasztása")
+                if target:
+                    dmg = max(0, player.attack - target.defense)
+                    target.hp -= dmg
+                    print(f"💥 {player.name} megtámadta {target.name}-t ({dmg} dmg)")
+                    if target.hp <= 0:
+                        print(f"☠️ {target.name} elesett!")
+
+            elif choice == "2":
+                target = choose_target(enemies, "Célpont kiválasztása spellhez")
+                if target:
+                    dmg = player.cast_spell()
+                    target.hp -= dmg
+                    print(f"🪄 {player.name} varázsolt {target.name}-ra ({dmg} dmg)")
+                    if target.hp <= 0:
+                        print(f"☠️ {target.name} elesett!")
+
+            elif choice == "3":
+                player.show_inventory()
+
+        # --- Enemy kör ---
+        for enemy in enemies:
+            if enemy.hp <= 0:
+                continue
+            targets_alive = [p for p in players if p.hp > 0]
+            if not targets_alive:
+                break
+            target = random.choice(targets_alive)
+            dmg = max(0, enemy.dmg - target.defense)
+            target.hp -= dmg
+            print(f"👾 {enemy.name} megtámadta {target.name}-t ({dmg} dmg)")
+            if target.hp <= 0:
+                print(f"💀 {target.name} elesett!")
+
+        round_num += 1
+
+    # --- Harc vége ---
+    if is_party_dead(players):
+        print("\n☠️ A party elbukott...")
+        for p in players:
+            if p.hp <= 0:
+                p.hp = 1
+    else:
+        print("\n🏆 Győzelem!")
+        total_gold = sum(e.gold for e in enemies)
+        total_exp = sum(e.exp for e in enemies)
+        per_player_exp = total_exp // len(players)
+        for p in players:
+            if p.hp > 0:
+                p.gold += total_gold // len(players)
+                p.gain_exp(per_player_exp)
+                print(f"{p.name} kapott {per_player_exp} EXP és {total_gold // len(players)} Gold")
