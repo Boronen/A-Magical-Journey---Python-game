@@ -1,65 +1,84 @@
+# spell.py
+
 class Spell:
-    def __init__(self, name, mana_cost, base_damage, level=1):
+    def __init__(self, spell_id, name, type_, element, stat, echo_tag, shout, levels, rage_cost=0, condition=None, effect=None):
+        self.spell_id = spell_id
         self.name = name
-        self.mana_cost = mana_cost
-        self.base_damage = base_damage
-        self.level = level
+        self.type = type_  # "active", "passive", "ultimate"
+        self.element = element  # e.g. "magic", "shadow", "neutral"
+        self.stat = stat  # e.g. "magic", "atk", "speed"
+        self.echo_tag = echo_tag  # bool
+        self.shout = shout  # string
+        self.levels = levels  # dict: level → effects
+        self.rage_cost = rage_cost  # only for ultimate
+        self.condition = condition  # optional trigger condition
+        self.effect = effect  # optional static effect (ultimate only)
 
-    def damage(self, magic_stat):
-        return int(self.base_damage + magic_stat * (0.8 + 0.2 * self.level))
+    def get_effects(self, level):
+        return self.levels.get(level, {})
 
-    def upgrade(self):
-        if self.level < 3:
-            self.level += 1
-            print(f"⬆️ {self.name} fejlesztve Lv{self.level}")
-        else:
-            print(f"⚠️ {self.name} már max szintű.")
+    def calculate_damage(self, caster, level):
+        effects = self.get_effects(level)
+        base = effects.get("damage", 0)
+        bonus = effects.get("bonus_damage", 0)
+        scale_stat = getattr(caster, self.stat, 0)
+        scaling = 1 + (level * 0.1)
+        return int((base + bonus + scale_stat) * scaling)
 
     def to_dict(self):
         return {
+            "spell_id": self.spell_id,
             "name": self.name,
-            "mana_cost": self.mana_cost,
-            "base_damage": self.base_damage,
-            "level": self.level
+            "type": self.type,
+            "element": self.element,
+            "stat": self.stat,
+            "echo_tag": self.echo_tag,
+            "shout": self.shout,
+            "levels": self.levels,
+            "rage_cost": self.rage_cost,
+            "condition": self.condition,
+            "effect": self.effect
         }
 
     @staticmethod
     def from_dict(d):
-        return Spell(d["name"], d["mana_cost"], d["base_damage"], d["level"])
+        return Spell(
+            spell_id=d["spell_id"],
+            name=d["name"],
+            type_=d["type"],
+            element=d.get("element", "neutral"),
+            stat=d.get("stat", "magic"),
+            echo_tag=d.get("echo_tag", False),
+            shout=d.get("shout", ""),
+            levels=d.get("levels", {}),
+            rage_cost=d.get("rage_cost", 0),
+            condition=d.get("condition"),
+            effect=d.get("effect")
+        )
 
 def get_class_spells(pclass):
-    if pclass == "warrior":
-        return {
-            "Power Slash": Spell("Power Slash", 3, 5),
-            "Whirlwind": Spell("Whirlwind", 5, 8),
-            "Earth Shatter": Spell("Earth Shatter", 8, 12)
-        }
-    elif pclass == "thief":
-        return {
-            "Poison Dagger": Spell("Poison Dagger", 3, 4),
-            "Shadow Strike": Spell("Shadow Strike", 5, 7),
-            "Vanish Blade": Spell("Vanish Blade", 8, 11)
-        }
-    elif pclass == "mage":
-        return {
-            "Ice Shard": Spell("Ice Shard", 3, 6),
-            "Ice Pillar": Spell("Ice Pillar", 5, 9),
-            "Ice Storm": Spell("Ice Storm", 8, 13)
-        }
-    else:
-        return {}
+    if pclass == "thief":
+        return load_thief_spells()
+    return {}
 
-def analyse(enemy):
-    print(f"\n🔎 {enemy.name} elemzése:")
-    print(f"Gyenge pont: {enemy.weakness}")
-    print(f"Ellenállás: {enemy.resistance}")
-
-def trigger_echo_field(source):
-    if source.echo_tag and source.crit:
-        battlefield.activate_echo_field()
-
-def can_activate_ultimate(character):
-    return character.rage_bar >= 100 and character.hp < 10
+def load_thief_spells():
+    raw = SPELLS_THIEF_MC  # ez a nagy dict, amit már definiáltál
+    spells = {}
+    for spell_id, data in raw.items():
+        spells[spell_id] = Spell(
+            spell_id=spell_id,
+            name=data["name"],
+            type_=data["type"],
+            element=data.get("element", "neutral"),
+            stat=data.get("stat", "magic"),
+            echo_tag=data.get("echo_tag", False),
+            shout=data.get("shout", ""),
+            levels=data.get("levels", {}),
+            rage_cost=data.get("rage_cost", 0),
+            condition=data.get("condition"),
+            effect=data.get("effect")
+        )
+    return spells
 
 SPELLS_THIEF_MC = {
     # Aktív spellek

@@ -16,11 +16,12 @@ def load_chapter(filepath, player):
             continue
 
         if line.startswith("[") and line.endswith("]"):
-            if current_scene["type"]:
+            if current_scene["type"] is not None:
                 scenes.append(current_scene)
             current_scene = {"type": line[1:-1], "content": []}
         else:
-            line = line.replace("{player_name}", player.name)
+            if player.party and player.party[0].name:
+                line = line.replace("{player_name}", player.party[0].name)
             current_scene["content"].append(line)
 
     if current_scene["type"]:

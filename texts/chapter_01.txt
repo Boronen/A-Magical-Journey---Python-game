@@ -16,16 +16,13 @@ A tested fáj, de mozdulni tudsz. A csuklódon egy régi, kopott bilincs. A zár
 3. Kiáltasz segítségért.
 
 [RESPONSE_1]
-[NARRATOR]
-A cella kicsi, de van egy rozsdás ajtó, és egy repedés a falon, amin keresztül halvány fény szűrődik be.
+Narrátor: A cella kicsi, de van egy rozsdás ajtó, és egy repedés a falon, amin keresztül halvány fény szűrődik be.
 
 [RESPONSE_2]
-[NARRATOR]
-A bilincs hideg és nehéz, de már nem tart fogva. Valaki kinyithatta... vagy valami.
+Narrátor: A bilincs hideg és nehéz, de már nem tart fogva. Valaki kinyithatta... vagy valami.
 
 [RESPONSE_3]
-[NARRATOR]
-A hangod visszhangzik a kőfalakról. Senki nem válaszol. Csak a saját lélegzeted hallod.
+Narrátor: A hangod visszhangzik a kőfalakról. Senki nem válaszol. Csak a saját lélegzeted hallod.
 
 # SCENE_02 – A folyosó
 
@@ -66,16 +63,13 @@ A nevem Lua. Régóta itt vagyok... vagy csak úgy érzem. Ez a hely... eltorzí
 3. „Mi ez az egész hely?”
 
 [RESPONSE_1]
-[LUA]
-Csak foszlányokat. Egy név... Valerion. És egy ígéret, amit nem tudok felidézni.
+Lua: Csak foszlányokat. Egy név... Valerion. És egy ígéret, amit nem tudok felidézni.
 
 [RESPONSE_2]
-[LUA]
-Talán. De nem egyedül. Együtt több esélyünk van.
+Lua: Talán. De nem egyedül. Együtt több esélyünk van.
 
 [RESPONSE_3]
-[LUA]
-Egy torz világ. Egy börtön. Egy próba. De hogy ki áll mögötte... azt még nem tudom.
+Lua: Egy torz világ. Egy börtön. Egy próba. De hogy ki áll mögötte... azt még nem tudom.
 
 [NARRATOR]
 Lua rád néz. A tekintete komoly, de nem ellenséges.

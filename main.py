@@ -1,5 +1,7 @@
 import os
+import pygame
 from player import Player
+from characters import Character
 from save import SaveManager
 from story_engine import run_story
 from utils import safe_input_int
@@ -8,8 +10,21 @@ from utils import safe_input_int
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 TEXT_DIR = os.path.join(BASE_DIR, "texts")
 CHAPTER_1_PATH = os.path.join(TEXT_DIR, "chapter_01.txt")
+MUSIC_PATH = os.path.join(BASE_DIR, "Celestial Quest.mp3")
 
-def create_player():
+def init_music():
+    pygame.init()
+    pygame.mixer.init()
+    try:
+        music_path = os.path.join(BASE_DIR, "songs", "Celestial Quest.mp3")
+        pygame.mixer.music.load(music_path)
+        pygame.mixer.music.play(-1)
+        print("Zene elindítva: Celestial Quest.mp3")
+    except Exception as e:
+        print(f"Zene betöltése sikertelen: {e}")
+
+
+def create_character():
     print("\nKarakter létrehozása")
     name = input("Név: ").strip()
 
@@ -27,19 +42,21 @@ def create_player():
             break
         print("Érvénytelen osztály. Csak: warrior, thief, mage")
 
-    return Player(name, race, pclass)
+    return Character(name, race, pclass)
 
 def new_game():
-    player = create_player()
-    party = [player]
-    run_story(CHAPTER_1_PATH, player, party)
+    player = Player()
+    hero = create_character()
+    player.add_character(hero)
+    run_story(CHAPTER_1_PATH, player, player.party)
 
 def continue_game():
     slot = safe_input_int("Betöltés slot (1-3): ", 1, 3)
     loaded_party = SaveManager.load_party(slot)
     if loaded_party:
         print("Mentés betöltve.")
-        player = loaded_party[0]
+        player = Player()
+        player.party = loaded_party
         run_story(CHAPTER_1_PATH, player, loaded_party)
     else:
         print("Nincs mentés ebben a slotban.")
@@ -53,6 +70,7 @@ def show_credits():
     print("Email: boronenprojects@gmail.com")
 
 def main_menu():
+    init_music()
     while True:
         print("\n=== Főmenü ===")
         print("1. Új játék")
@@ -70,6 +88,7 @@ def main_menu():
             show_credits()
         elif choice == "4":
             print("Kilépés...")
+            pygame.mixer.music.stop()
             break
         else:
             print("Érvénytelen választás.")
